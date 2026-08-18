@@ -44,9 +44,10 @@ export const WorldHero: React.FC<WorldHeroProps> = ({ onToggleWorldSelector }) =
       return;
     }
 
-    const firstPlaylist = currentWorld.recommendedPlaylists[0];
-    if (firstPlaylist && firstPlaylist.tracks.length > 0) {
-      playTrack(firstPlaylist.tracks[0], firstPlaylist.tracks);
+    const allTracks = currentWorld.recommendedPlaylists.flatMap((p) => p.tracks);
+    if (allTracks.length > 0) {
+      const shuffled = [...allTracks].sort(() => Math.random() - 0.5);
+      playTrack(shuffled[0], shuffled);
     }
   };
 

@@ -117,26 +117,76 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               <span>Visualizer & Environment</span>
             </div>
 
-            {/* Visualizer Intensity */}
+            {/* Ambient Edge Visualizer (Perimeter Aura) Toggle */}
             <div className="flex items-center justify-between p-3 rounded-2xl border border-white/5 bg-black/25">
               <div className="min-w-0 flex-1 pr-2">
                 <span className="text-xs sm:text-sm font-semibold text-white block">
-                  Visualizer Waveform (ತರಂಗ ದೃಶ್ಯ)
+                  Ambient Edge Visualizer (ಪರಿಸರದ ತರಂಗ ದೃಶ್ಯ)
                 </span>
                 <span className="text-[11px] text-slate-400 block truncate">
-                  Organic audio reactivity on bottom player
+                  Atmospheric audio-reactive aura around screen edges
                 </span>
               </div>
-              <select
-                value={settings.visualizerIntensity}
-                onChange={(e) => updateSettings({ visualizerIntensity: e.target.value as any })}
-                className="bg-black/60 border border-white/20 text-xs text-white rounded-xl px-2.5 py-1.5 focus:outline-none flex-shrink-0"
+              <button
+                onClick={() => updateSettings({ visualizerEnabled: !settings.visualizerEnabled })}
+                className={`min-w-[48px] h-7 rounded-full p-1 transition-colors flex-shrink-0 touch-manipulation ${
+                  settings.visualizerEnabled ? 'bg-emerald-500' : 'bg-white/20'
+                }`}
               >
-                <option value="subtle">Subtle (ಸೂಕ್ಷ್ಮ)</option>
-                <option value="standard">Standard (ಸಾಮಾನ್ಯ)</option>
-                <option value="off">Off (ಸ್ಥಗಿತ)</option>
-              </select>
+                <div
+                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                    settings.visualizerEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
             </div>
+
+            {/* Visualizer Intensity Selector */}
+            {settings.visualizerEnabled && (
+              <>
+                <div className="flex items-center justify-between p-3 rounded-2xl border border-white/5 bg-black/25">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <span className="text-xs sm:text-sm font-semibold text-white block">
+                      Equalizer Design (ತರಂಗ ವಿನ್ಯಾಸ)
+                    </span>
+                    <span className="text-[11px] text-slate-400 block truncate">
+                      Select perimeter equalizer aesthetic
+                    </span>
+                  </div>
+                  <select
+                    value={settings.visualizerDesign || 'fluid-liquid'}
+                    onChange={(e) => updateSettings({ visualizerDesign: e.target.value as any })}
+                    className="bg-black/60 border border-white/20 text-xs text-white rounded-xl px-2.5 py-1.5 focus:outline-none flex-shrink-0"
+                  >
+                    <option value="fluid-liquid">🌊 Fluid Liquid Wave (ದ್ರವ ತರಂಗ)</option>
+                    <option value="minimal-pulse">⚡ Minimalist Pulse (ಸೂಕ್ಷ್ಮ ಪಲ್ಸ್)</option>
+                    <option value="perimeter-bars">📊 Perimeter EQ Bars (ಸ್ಪೆಕ್ಟ್ರಮ್ ಬಾರ್)</option>
+                    <option value="aurora-ribbon">🌈 Aurora Ribbon (ಅರೋರಾ ರಿಬ್ಬನ್)</option>
+                    <option value="particle-shimmer">✨ Particle Shimmer (ಕಾಸ್ಮಿಕ್ ಕಣ)</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-2xl border border-white/5 bg-black/25">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <span className="text-xs sm:text-sm font-semibold text-white block">
+                      Visualizer Intensity (ತೀವ್ರತೆ)
+                    </span>
+                    <span className="text-[11px] text-slate-400 block truncate">
+                      Control the strength of the edge light field
+                    </span>
+                  </div>
+                  <select
+                    value={settings.visualizerIntensity || 'subtle'}
+                    onChange={(e) => updateSettings({ visualizerIntensity: e.target.value as any })}
+                    className="bg-black/60 border border-white/20 text-xs text-white rounded-xl px-2.5 py-1.5 focus:outline-none flex-shrink-0"
+                  >
+                    <option value="subtle">Subtle (ಸೂಕ್ಷ್ಮ - Soft glow)</option>
+                    <option value="balanced">Balanced (ಸಮತೋಲನ - Fluid waves)</option>
+                    <option value="immersive">Immersive (ಆಕರ್ಷಕ - Deep aura)</option>
+                  </select>
+                </div>
+              </>
+            )}
 
             {/* Reduced Motion Toggle */}
             <div className="flex items-center justify-between p-3 rounded-2xl border border-white/5 bg-black/25">
@@ -160,6 +210,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   }`}
                 />
               </button>
+            </div>
+
+            {/* Video Fit (Mobile Fullscreen Coverage) */}
+            <div className="flex items-center justify-between p-3 rounded-2xl border border-white/5 bg-black/25">
+              <div className="min-w-0 flex-1 pr-2">
+                <span className="text-xs sm:text-sm font-semibold text-white block">
+                  Mobile Video Fit (ಪೂರ್ಣ ಪರದೆ ವಿಡಿಯೋ)
+                </span>
+                <span className="text-[11px] text-slate-400 block truncate">
+                  {settings.videoFit === 'contain' ? 'Fit aspect ratio' : '100% Full Screen Edge-to-Edge Fill'}
+                </span>
+              </div>
+              <select
+                value={settings.videoFit || 'cover'}
+                onChange={(e) => updateSettings({ videoFit: e.target.value as 'cover' | 'contain' })}
+                className="bg-black/60 border border-white/20 text-xs text-white rounded-xl px-2.5 py-1.5 focus:outline-none flex-shrink-0"
+              >
+                <option value="cover">Full Screen (ಪೂರ್ಣ ಪರದೆ)</option>
+                <option value="contain">Fit 16:9 (ಫಿಟ್)</option>
+              </select>
             </div>
 
             {/* Force Desktop / Wide View Mode */}

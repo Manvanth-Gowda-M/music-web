@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { WorldBackground } from '@/components/world/WorldBackground';
+import { AmbientEdgeVisualizer } from '@/components/visualizer/AmbientEdgeVisualizer';
 import { WorldHeader } from '@/components/world/WorldHeader';
 import { WorldHero } from '@/components/world/WorldHero';
 import { WorldSelector } from '@/components/world/WorldSelector';
@@ -30,7 +31,10 @@ export default function Home() {
       {/* Layer 0 & 1: 4K Looping Background Video & Cinematic Vignette */}
       <WorldBackground />
 
-      {/* Layer 2: Top Navigation */}
+      {/* Layer 3: Ambient Audio-Reactive Edge Visualization (Perimeter Light Field) */}
+      <AmbientEdgeVisualizer />
+
+      {/* Layer 2/4: Top Navigation Header */}
       <WorldHeader
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}

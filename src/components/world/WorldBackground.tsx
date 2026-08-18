@@ -25,22 +25,65 @@ export const WorldBackground: React.FC = () => {
     };
   }, []);
 
-  // Ensure active video is playing
+  // Ensure active video is playing and attributes are properly set for mobile
   useEffect(() => {
-    if (activeVideoRef.current && !settings.reducedMotion) {
-      activeVideoRef.current.play().catch(() => {});
+    const video = activeVideoRef.current;
+    if (video && !settings.reducedMotion) {
+      video.defaultMuted = true;
+      video.muted = !settings.isAmbientEnabled;
+      video.playsInline = true;
+      video.setAttribute('playsinline', 'true');
+      video.setAttribute('webkit-playsinline', 'true');
+      video.setAttribute('x5-playsinline', 'true');
+      
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          // Retry with muted state if mobile policy requires it
+          if (!video.muted) {
+            video.muted = true;
+            video.play().catch(() => {});
+          }
+        });
+      }
     }
-  }, [currentWorld.id, settings.reducedMotion]);
+  }, [currentWorld.id, settings.reducedMotion, settings.isAmbientEnabled]);
 
   const handleVideoError = (worldId: string) => {
     setVideoError((prev) => ({ ...prev, [worldId]: true }));
   };
 
+  const isCover = settings.videoFit !== 'contain';
+
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0 select-none bg-black">
+    <div className="fixed inset-0 w-screen h-screen h-[100dvh] overflow-hidden pointer-events-none z-0 bg-black">
+      {/* Background Ambient Glow / Backdrop when in contain mode */}
+      {!isCover && (
+        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          {!videoError[currentWorld.id] && !settings.reducedMotion ? (
+            <video
+              src={currentWorld.video}
+              poster={currentWorld.poster}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className="w-full h-full object-cover filter blur-3xl scale-125 opacity-50"
+            />
+          ) : (
+            <img
+              src={currentWorld.poster}
+              alt={currentWorld.name}
+              className="w-full h-full object-cover filter blur-3xl scale-125 opacity-50"
+            />
+          )}
+        </div>
+      )}
+
       {/* Previous World Video during smooth crossfade */}
       {isTransitioning && previousWorld && (
-        <div className="absolute inset-0 w-full h-full animate-fade-out pointer-events-none z-0">
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center animate-fade-out pointer-events-none z-[1]">
           {!videoError[previousWorld.id] && !settings.reducedMotion ? (
             <video
               src={previousWorld.video}
@@ -49,30 +92,36 @@ export const WorldBackground: React.FC = () => {
               muted
               loop
               playsInline
-              className="absolute inset-0 w-full h-full object-cover object-center"
+              preload="auto"
+              className="w-full h-full object-cover object-center"
             />
           ) : (
             <img
               src={previousWorld.poster}
               alt={previousWorld.name}
-              className="absolute inset-0 w-full h-full object-cover object-center"
+              className="w-full h-full object-cover object-center"
             />
           )}
         </div>
       )}
 
-      {/* Current Active World Video (Full 100% Viewport Coverage) */}
+      {/* Current Active World Video Layer (Always fills full viewport) */}
       <div
         key={currentWorld.id}
-        className="absolute inset-0 w-full h-full animate-fade-in z-0"
+        className="absolute inset-0 w-full h-full flex items-center justify-center animate-fade-in z-[2]"
       >
         {!videoError[currentWorld.id] && !settings.reducedMotion ? (
           <video
             ref={(el) => {
               activeVideoRef.current = el;
               if (el) {
+                el.defaultMuted = true;
                 el.muted = !settings.isAmbientEnabled;
                 el.volume = Math.max(0, Math.min(1, settings.ambientVolume));
+                el.playsInline = true;
+                el.setAttribute('playsinline', 'true');
+                el.setAttribute('webkit-playsinline', 'true');
+                el.setAttribute('x5-playsinline', 'true');
               }
             }}
             src={currentWorld.video}
@@ -81,25 +130,30 @@ export const WorldBackground: React.FC = () => {
             muted={!settings.isAmbientEnabled}
             loop
             playsInline
+            preload="auto"
             onError={() => handleVideoError(currentWorld.id)}
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className={`w-full h-full transition-all duration-700 ${
+              isCover ? 'object-cover object-center' : 'object-contain object-center'
+            }`}
           />
         ) : (
           <img
             src={currentWorld.poster}
             alt={currentWorld.name}
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className={`w-full h-full transition-all duration-700 ${
+              isCover ? 'object-cover object-center' : 'object-contain object-center'
+            }`}
           />
         )}
       </div>
 
-      {/* Subtle Readability Vignette: Soft gradient preserving maximum video visibility */}
+      {/* Subtle Readability Vignette */}
       <div
-        className="absolute inset-0 pointer-events-none z-[1]"
+        className="absolute inset-0 pointer-events-none z-[3]"
         style={{
           background: `
-            radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 40%, rgba(5, 8, 15, 0.40) 100%),
-            linear-gradient(to top, rgba(5, 8, 15, 0.70) 0%, transparent 25%, transparent 75%, rgba(5, 8, 15, 0.55) 100%)
+            radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 40%, rgba(5, 8, 15, 0.4) 100%),
+            linear-gradient(to top, rgba(5, 8, 15, 0.7) 0%, transparent 35%, transparent 65%, rgba(5, 8, 15, 0.5) 100%)
           `,
         }}
       />

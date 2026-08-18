@@ -22,7 +22,7 @@ interface LibraryStore {
 export const useLibraryStore = create<LibraryStore>((set, get) => ({
   favoriteTrackIds: ['rain-track-1', 'temple-track-2'],
   favoritePlaylistIds: ['rain-pl-1'],
-  favoriteWorldIds: ['rainy-train', 'temple-morning'],
+  favoriteWorldIds: ['ksrtc-bus', 'temple-morning'],
   isLibraryOpen: false,
 
   toggleFavoriteTrack: (trackId: string) => {

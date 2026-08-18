@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { Track, RepeatMode } from '@/types';
 import { AudioEngine } from '@/services/audio/AudioEngine';
+import { CURATED_TRACKS } from '@/data/curatedTracks';
 
 interface PlayerStore {
   currentTrack: Track | null;
@@ -101,7 +102,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
     if (!currentTrack) {
       if (queue.length > 0) {
-        await get().playTrack(queue[0]);
+        await get().playTrack(queue[0], queue);
       }
       return;
     }
@@ -110,9 +111,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       audio.pause();
       set({ isPlaying: false });
     } else {
+      if (!audio.src || audio.src === '' || (!audio.src.endsWith(currentTrack.audioUrl) && !currentTrack.audioUrl.startsWith('http'))) {
+        audio.src = currentTrack.audioUrl;
+        audio.load();
+      }
       try {
         await audio.play();
-        set({ isPlaying: true });
+        set({ isPlaying: true, isLoading: false });
       } catch (err) {
         console.warn('Play failed:', err);
       }
@@ -128,12 +133,17 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   play: async () => {
     await AudioEngine.resumeContext();
     const audio = AudioEngine.getAudioElement();
-    if (audio) {
+    const { currentTrack } = get();
+    if (audio && currentTrack) {
+      if (!audio.src || audio.src === '') {
+        audio.src = currentTrack.audioUrl;
+        audio.load();
+      }
       try {
         await audio.play();
-        set({ isPlaying: true });
+        set({ isPlaying: true, isLoading: false });
       } catch (e) {
-        console.warn(e);
+        console.warn('Audio play failed:', e);
       }
     }
   },
@@ -148,7 +158,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   next: async () => {
     const { queue, currentTrack, shuffle, repeat } = get();
-    if (queue.length === 0 && !currentTrack) return;
+    let activeQueue = queue;
+
+    if (activeQueue.length <= 1) {
+      const worldTracks = CURATED_TRACKS.filter((t) => t.worldId === currentTrack?.worldId);
+      activeQueue = worldTracks.length > 0 ? worldTracks : CURATED_TRACKS;
+      set({ queue: activeQueue });
+    }
 
     if (repeat === 'one' && currentTrack) {
       get().seek(0);
@@ -156,21 +172,21 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       return;
     }
 
-    const currentIndex = queue.findIndex((t) => t.id === currentTrack?.id);
-    let nextIndex = currentIndex + 1;
+    const currentIndex = activeQueue.findIndex((t) => t.id === currentTrack?.id);
+    let nextIndex = 0;
 
-    if (shuffle) {
-      nextIndex = Math.floor(Math.random() * queue.length);
-    } else if (nextIndex >= queue.length) {
-      if (repeat === 'all') {
-        nextIndex = 0;
-      } else {
-        set({ isPlaying: false });
-        return;
-      }
+    if (shuffle && activeQueue.length > 1) {
+      do {
+        nextIndex = Math.floor(Math.random() * activeQueue.length);
+      } while (nextIndex === currentIndex && activeQueue.length > 1);
+    } else if (currentIndex >= 0 && currentIndex < activeQueue.length - 1) {
+      nextIndex = currentIndex + 1;
+    } else {
+      // Loop seamlessly to beginning of active queue
+      nextIndex = 0;
     }
 
-    const nextTrack = queue[nextIndex];
+    const nextTrack = activeQueue[nextIndex];
     if (nextTrack) {
       await get().playTrack(nextTrack);
     }
@@ -178,13 +194,23 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   previous: async () => {
     const { queue, currentTrack, currentTime } = get();
+    if (queue.length === 0 && !currentTrack) return;
+
+    // If more than 3 seconds in, restart track first; double click to go to prev
     if (currentTime > 3) {
       get().seek(0);
       return;
     }
 
     const currentIndex = queue.findIndex((t) => t.id === currentTrack?.id);
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : queue.length - 1;
+    let prevIndex = 0;
+
+    if (currentIndex > 0) {
+      prevIndex = currentIndex - 1;
+    } else if (queue.length > 0) {
+      prevIndex = queue.length - 1;
+    }
+
     const prevTrack = queue[prevIndex];
     if (prevTrack) {
       await get().playTrack(prevTrack);

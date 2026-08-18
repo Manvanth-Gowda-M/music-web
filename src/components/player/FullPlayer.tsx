@@ -20,6 +20,11 @@ import { usePlayerStore } from '@/store/playerStore';
 import { useWorldStore } from '@/store/worldStore';
 import { useLibraryStore } from '@/store/libraryStore';
 import { AudioVisualizer } from './AudioVisualizer';
+import { VintageCassetteDeck } from './VintageCassetteDeck';
+import { TempleDeck } from './TempleDeck';
+import { BeachDeck } from './BeachDeck';
+import { PassengerGlassDeck } from './PassengerGlassDeck';
+import { UniversalDeck } from './UniversalDeck';
 
 function formatTime(seconds: number): string {
   if (isNaN(seconds) || seconds < 0) return '0:00';
@@ -99,26 +104,43 @@ export const FullPlayer: React.FC = () => {
 
       {/* Center Body: Artwork, Kannada Metadata, Visualizer */}
       <div className="w-full max-w-md mx-auto my-auto flex flex-col items-center text-center py-2 sm:py-6">
-        {/* Album Artwork with Responsive Scale */}
-        <div
-          className="relative w-52 h-52 xs:w-60 xs:h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-2xl sm:rounded-3xl overflow-hidden border shadow-2xl mb-4 sm:mb-6 group flex-shrink-0"
-          style={{
-            borderColor: currentWorld.palette.border,
-            boxShadow: `0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px ${currentWorld.palette.glow}`,
-          }}
-        >
-          <img
-            src={currentTrack.artwork}
-            alt={currentTrack.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-          {/* Genre Pill on Artwork */}
-          <div className="absolute bottom-3 left-3 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-medium text-slate-200">
-            {currentTrack.genre}
+        {/* Themed Relatable 3D Centerpiece Player (Vintage Cassette / Temple Brass / Beach Deck / Passenger Glass) */}
+        {currentWorld.id === 'ksrtc-bus' ? (
+          // =========================================================================
+          // THEME 1: VINTAGE KSRTC CASSETTE DECK (Reference Accurate)
+          // =========================================================================
+          <div className="w-full mb-3 sm:mb-5">
+            <VintageCassetteDeck />
           </div>
-        </div>
+        ) : currentWorld.id === 'temple-morning' ? (
+          // =========================================================================
+          // THEME 2: SACRED TEMPLE BRASS AUDIO DECK (Reference Accurate)
+          // =========================================================================
+          <div className="w-full mb-3 sm:mb-5">
+            <TempleDeck />
+          </div>
+        ) : currentWorld.id === 'coastal-morning' ? (
+          // =========================================================================
+          // THEME 3: VINTAGE COASTAL BEACH CASSETTE DECK (Reference Accurate)
+          // =========================================================================
+          <div className="w-full mb-3 sm:mb-5">
+            <BeachDeck />
+          </div>
+        ) : currentWorld.id === 'universal-mode' ? (
+          // =========================================================================
+          // THEME 5: UNIVERSAL MP5 PRO CYBER DECK
+          // =========================================================================
+          <div className="w-full mb-3 sm:mb-5">
+            <UniversalDeck />
+          </div>
+        ) : (
+          // =========================================================================
+          // THEME 4: MALNAD BUS PASSENGER GLASS DECK
+          // =========================================================================
+          <div className="w-full mb-3 sm:mb-5">
+            <PassengerGlassDeck />
+          </div>
+        )}
 
         {/* Track Title & Kannada Info */}
         <div className="w-full flex items-center justify-between px-2 mb-2 sm:mb-3">
@@ -149,13 +171,13 @@ export const FullPlayer: React.FC = () => {
           </button>
         </div>
 
-        {/* Real-time Web Audio API Visualizer Canvas */}
+        {/* Real-time Themed Web Audio API Visualizer Canvas */}
         <div className="w-full my-2 sm:my-3 px-1">
           <AudioVisualizer
             style={currentWorld.visualizerStyle}
             palette={currentWorld.palette}
-            height={44}
-            className="w-full rounded-xl bg-white/[0.03] border border-white/5 p-1.5"
+            height={52}
+            className="w-full rounded-2xl bg-black/40 border border-white/10 p-1 backdrop-blur-md shadow-inner"
           />
         </div>
 

@@ -14,12 +14,17 @@ export class SwanyMusicProvider implements MusicProvider {
     return true;
   }
 
-  async search(query: string): Promise<Track[]> {
+  async search(query: string, language = 'Kannada', mood = ''): Promise<Track[]> {
     try {
-      const endpoint = `/api/songs/search?q=${encodeURIComponent(query || 'Kannada evergreen')}`;
+      const params = new URLSearchParams();
+      if (query) params.set('q', query);
+      if (language) params.set('lang', language);
+      if (mood) params.set('mood', mood);
+
+      const endpoint = `/api/songs/search?${params.toString()}`;
       const res = await fetch(endpoint, {
         headers: { Accept: 'application/json' },
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (!res.ok) throw new Error('Search failed');

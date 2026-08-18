@@ -1,6 +1,6 @@
-export type WorldId = 'rainy-train' | 'temple-morning' | 'coastal-morning' | 'ksrtc-rain' | 'ksrtc-bus';
+export type WorldId = 'ksrtc-bus' | 'temple-morning' | 'coastal-morning' | 'malnad-bus' | 'universal-mode';
 
-export type VisualizerStyle = 'rain' | 'temple' | 'coast' | 'bus';
+export type VisualizerStyle = 'rain' | 'temple' | 'coast' | 'bus' | 'universal';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 
@@ -74,12 +74,22 @@ export interface World {
   ambientSound?: AmbientSound;
 }
 
+export type VisualizerDesign =
+  | 'fluid-liquid'
+  | 'minimal-pulse'
+  | 'perimeter-bars'
+  | 'aurora-ribbon'
+  | 'particle-shimmer';
+
 export interface AudioSettings {
   autoplay: boolean;
   crossfade: number; // 0 to 5 seconds
   volumeNormalization: boolean;
   videoQuality: '4k' | '1080p' | 'auto';
-  visualizerIntensity: 'subtle' | 'standard' | 'off';
+  videoFit?: 'cover' | 'contain';
+  visualizerEnabled: boolean;
+  visualizerIntensity: 'subtle' | 'balanced' | 'immersive';
+  visualizerDesign: VisualizerDesign;
   reducedMotion: boolean;
   ambientVolume: number; // 0 to 1
   isAmbientEnabled: boolean;

@@ -35,11 +35,23 @@ function cleanHtmlEntities(str: string): string {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('q') || 'Kannada songs';
+  const q = searchParams.get('q')?.trim() || '';
+  const language = searchParams.get('lang') || 'Kannada';
+  const mood = searchParams.get('mood') || '';
+
+  // Build intelligent multi-language search query
+  let searchQuery = '';
+  if (q) {
+    searchQuery = language && language !== 'All' ? `${q} ${language}` : q;
+  } else if (mood) {
+    searchQuery = language && language !== 'All' ? `${language} ${mood} songs` : `${mood} songs`;
+  } else {
+    searchQuery = language && language !== 'All' ? `${language} top hits trending` : 'top trending hits';
+  }
 
   try {
-    const targetUrl = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=20&p=1&q=${encodeURIComponent(
-      query + ' Kannada'
+    const targetUrl = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=30&p=1&q=${encodeURIComponent(
+      searchQuery
     )}`;
 
     const res = await fetch(targetUrl, {
@@ -69,13 +81,13 @@ export async function GET(request: Request) {
         return {
           id: r.id,
           title: cleanHtmlEntities(r.title),
-          artist: cleanHtmlEntities(r.more_info?.singers || r.subtitle || 'Kannada Artist'),
+          artist: cleanHtmlEntities(r.more_info?.singers || r.subtitle || 'Artist'),
           album: cleanHtmlEntities(r.more_info?.album || 'Single'),
           duration: Number(r.more_info?.duration || 240),
           artwork: artwork || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80',
           audioUrl: streamUrl,
-          language: 'Kannada',
-          genre: 'Kannada Stream',
+          language: r.language ? r.language.charAt(0).toUpperCase() + r.language.slice(1) : language,
+          genre: mood ? `${mood} Melody` : 'Universal Hits',
           source: 'swany',
           sourceId: r.id,
           year: r.year ? Number(r.year) : undefined,

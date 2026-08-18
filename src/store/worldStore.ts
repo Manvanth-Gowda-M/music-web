@@ -24,7 +24,10 @@ const DEFAULT_SETTINGS: AudioSettings = {
   crossfade: 2,
   volumeNormalization: true,
   videoQuality: 'auto',
-  visualizerIntensity: 'standard',
+  videoFit: 'cover',
+  visualizerEnabled: true,
+  visualizerIntensity: 'subtle',
+  visualizerDesign: 'fluid-liquid',
   reducedMotion: false,
   ambientVolume: 0.35,
   isAmbientEnabled: false,
@@ -56,14 +59,17 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       AudioEngine.pauseAmbient();
     }
 
-    // Immediately switch the music playlist & play the new world's top song
+    // Immediately switch the music playlist & play a fresh random song from the new world's vibe
     const player = usePlayerStore.getState();
-    const newTracks = nextWorld.recommendedPlaylists.flatMap((p) => p.tracks);
+    const allTracks = nextWorld.recommendedPlaylists.flatMap((p) => p.tracks);
 
-    if (newTracks.length > 0) {
+    if (allTracks.length > 0) {
+      // Dynamic random shuffle so every visit to a world starts with a fresh, different song
+      const shuffledTracks = [...allTracks].sort(() => Math.random() - 0.5);
+      const randomTrack = shuffledTracks[0];
+
       try {
-        // Switch track & play new world's vibe
-        await player.playTrack(newTracks[0], newTracks);
+        await player.playTrack(randomTrack, shuffledTracks);
       } catch (err) {
         console.warn('Auto transition track error:', err);
       }

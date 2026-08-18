@@ -10,18 +10,26 @@ export class CuratedMusicProvider implements MusicProvider {
     return true;
   }
 
-  async search(query: string): Promise<Track[]> {
+  async search(query: string, language?: string, mood?: string): Promise<Track[]> {
     const q = query.toLowerCase().trim();
-    if (!q) return CURATED_TRACKS;
+    let list = CURATED_TRACKS;
 
-    return CURATED_TRACKS.filter(
+    if (language && language !== 'All' && language !== 'Universal') {
+      list = list.filter((t) => t.language.toLowerCase() === language.toLowerCase());
+    }
+
+    if (!q && !mood) return list.length > 0 ? list : CURATED_TRACKS;
+
+    return list.filter(
       (t) =>
-        t.title.toLowerCase().includes(q) ||
-        (t.localizedTitle && t.localizedTitle.includes(q)) ||
-        t.artist.toLowerCase().includes(q) ||
-        (t.localizedArtist && t.localizedArtist.includes(q)) ||
-        (t.album && t.album.toLowerCase().includes(q)) ||
-        t.genre.toLowerCase().includes(q)
+        (!q ||
+          t.title.toLowerCase().includes(q) ||
+          (t.localizedTitle && t.localizedTitle.includes(q)) ||
+          t.artist.toLowerCase().includes(q) ||
+          (t.localizedArtist && t.localizedArtist.includes(q)) ||
+          (t.album && t.album.toLowerCase().includes(q)) ||
+          t.genre.toLowerCase().includes(q)) &&
+        (!mood || t.genre.toLowerCase().includes(mood.toLowerCase()))
     );
   }
 

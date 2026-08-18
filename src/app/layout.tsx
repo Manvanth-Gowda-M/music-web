@@ -16,6 +16,16 @@ export const metadata: Metadata = {
     'Kannada Classical',
   ],
   authors: [{ name: 'Swara Loka Studio' }],
+  icons: {
+    icon: '/logo.jpg',
+    shortcut: '/logo.jpg',
+    apple: '/logo.jpg',
+  },
+  openGraph: {
+    title: 'ಸ್ವರ ಲೋಕ • Kannada Ambient Music Worlds',
+    description: 'An immersive digital listening environment centered around Kannada ambient music, 4K environmental themes, and living Web Audio visualizer.',
+    images: ['/logo.jpg'],
+  },
 };
 
 export const viewport: Viewport = {

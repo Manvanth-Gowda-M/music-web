@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useWorldStore } from '@/store/worldStore';
 import { useLibraryStore } from '@/store/libraryStore';
+import { VisualizerToggle } from '@/components/visualizer/VisualizerToggle';
 
 interface WorldHeaderProps {
   onOpenSearch: () => void;
@@ -40,14 +41,17 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
       {/* Brand Title (Left) */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
         <div
-          className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border transition-colors duration-500 backdrop-blur-xl"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden flex items-center justify-center border transition-all duration-500 backdrop-blur-xl flex-shrink-0 shadow-xl ring-1 ring-white/20 group"
           style={{
-            borderColor: currentWorld.palette.border,
-            backgroundColor: currentWorld.palette.glassBg,
-            boxShadow: `0 0 14px ${currentWorld.palette.glow}`,
+            borderColor: currentWorld.palette.accent,
+            boxShadow: `0 0 16px ${currentWorld.palette.glow}`,
           }}
         >
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: currentWorld.palette.accent }} />
+          <img
+            src="/logo.jpg"
+            alt="Swara Loka Logo"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="flex items-center gap-1">
           <span className="font-kannada font-bold text-sm sm:text-lg tracking-wide text-white drop-shadow-sm">
@@ -59,40 +63,83 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
         </div>
       </div>
 
-      {/* Center: Current World Destination Capsule (Desktop & Mobile Tap) */}
-      <button
-        onClick={onToggleWorldSelector}
-        aria-label="Switch World Destination"
-        className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border transition-all duration-300 backdrop-blur-xl group min-h-[36px] sm:min-h-[40px] touch-manipulation truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none ${
-          isWorldSelectorOpen ? 'ring-1 ring-white/30 scale-105' : 'hover:scale-[1.02] active:scale-95'
-        }`}
-        style={{
-          borderColor: currentWorld.palette.border,
-          backgroundColor: currentWorld.palette.glassBg,
-        }}
-      >
-        <Compass
-          className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-500 group-hover:rotate-45 flex-shrink-0"
-          style={{ color: currentWorld.palette.accent }}
-        />
-        <div className="flex items-center gap-1 min-w-0">
-          <span className="text-[11px] sm:text-xs font-semibold text-white/95 truncate">
-            {currentWorld.name}
-          </span>
-          <span className="text-[11px] font-kannada text-slate-300 hidden md:inline truncate">
-            • {currentWorld.localizedName}
-          </span>
-        </div>
-      </button>
+      {/* Center: Current World Destination Capsule & Universal Mode Quick Switch */}
+      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+        <button
+          onClick={onToggleWorldSelector}
+          aria-label="Switch World Destination"
+          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border transition-all duration-300 backdrop-blur-xl group min-h-[36px] sm:min-h-[40px] touch-manipulation truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none ${
+            isWorldSelectorOpen ? 'ring-1 ring-white/30 scale-105' : 'hover:scale-[1.02] active:scale-95'
+          }`}
+          style={{
+            borderColor: currentWorld.palette.border,
+            backgroundColor: currentWorld.palette.glassBg,
+          }}
+        >
+          <Compass
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-500 group-hover:rotate-45 flex-shrink-0"
+            style={{ color: currentWorld.palette.accent }}
+          />
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-white/95 truncate">
+              {currentWorld.name}
+            </span>
+            <span className="text-[11px] font-kannada text-slate-300 hidden md:inline truncate">
+              • {currentWorld.localizedName}
+            </span>
+          </div>
+        </button>
+
+        {/* Dedicated Universal Mode Quick Switcher Pill */}
+        <button
+          onClick={() => {
+            if (currentWorld.id === 'universal-mode') {
+              onOpenSearch();
+            } else {
+              useWorldStore.getState().switchWorld('universal-mode', true);
+            }
+          }}
+          title="Switch to Universal MP3 Mode & Hub"
+          aria-label="Universal Mode"
+          className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full border transition-all duration-300 backdrop-blur-xl touch-manipulation active:scale-95 text-xs font-semibold flex-shrink-0 ${
+            currentWorld.id === 'universal-mode'
+              ? 'bg-pink-500/25 border-pink-400 text-pink-200 shadow-[0_0_15px_rgba(236,72,153,0.4)]'
+              : 'border-white/10 hover:border-pink-400/40 text-slate-300 hover:text-white bg-white/5'
+          }`}
+        >
+          <span className="text-xs">🌐</span>
+          <span className="hidden xs:inline">Universal</span>
+        </button>
+      </div>
 
       {/* Right: Quick Action Controls */}
       <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        {/* Video Fit Toggle: Full 16:9 Wide Frame vs Zoom Fill */}
+        <button
+          onClick={() => updateSettings({ videoFit: settings.videoFit === 'contain' ? 'cover' : 'contain' })}
+          title={settings.videoFit === 'contain' ? 'Full Video Mode Active (Showing 100% complete wide video) • Tap for Zoom Fill' : 'Zoom Fill Active • Tap to show 100% complete 16:9 video'}
+          aria-label="Toggle Full Video Mode"
+          className={`min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] p-2 rounded-full border transition-all duration-300 backdrop-blur-xl flex items-center justify-center touch-manipulation active:scale-90 ${
+            settings.videoFit === 'contain'
+              ? 'bg-white/20 border-white/40 text-white'
+              : 'border-white/10 hover:border-white/25 hover:bg-white/10 text-slate-300'
+          }`}
+          style={{
+            borderColor: settings.videoFit === 'contain' ? currentWorld.palette.accent : 'rgba(255, 255, 255, 0.12)',
+            backgroundColor: currentWorld.palette.glassBg,
+          }}
+        >
+          <span className="text-[10px] font-mono font-bold" style={{ color: settings.videoFit === 'contain' ? currentWorld.palette.accent : 'inherit' }}>
+            {settings.videoFit === 'contain' ? '16:9' : 'FILL'}
+          </span>
+        </button>
+
         {/* Desktop Mode Force Toggle Button */}
         <button
           onClick={toggleDesktopMode}
           title={settings.forceDesktopMode ? 'Switch to Mobile View' : 'Force Desktop / Wide Mode'}
           aria-label="Toggle Desktop View"
-          className={`min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] p-2 rounded-full border transition-all duration-300 backdrop-blur-xl flex items-center justify-center touch-manipulation active:scale-90 ${
+          className={`min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] p-2 rounded-full border transition-all duration-300 backdrop-blur-xl hidden md:flex items-center justify-center touch-manipulation active:scale-90 ${
             settings.forceDesktopMode
               ? 'bg-white/20 border-white/40 text-white'
               : 'border-white/10 hover:border-white/25 hover:bg-white/10 text-slate-300'
@@ -124,6 +171,9 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
             <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
           )}
         </button>
+
+        {/* Ambient Audio-Reactive Edge Visualizer Toggle */}
+        <VisualizerToggle />
 
         {/* Search Modal Trigger */}
         <button

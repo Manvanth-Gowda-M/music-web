@@ -13,7 +13,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Monsoon Classic",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2006
   },
   {
@@ -28,7 +28,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Romantic Rain",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2007
   },
   {
@@ -43,7 +43,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Acoustic Melody",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2008
   },
   {
@@ -58,7 +58,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Evergreen Rain",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2006
   },
   {
@@ -73,7 +73,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Rain Nostalgia",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2006
   },
   {
@@ -88,7 +88,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Melodic Acoustic",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2017
   },
   {
@@ -103,7 +103,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Monsoon Rhythm",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2006
   },
   {
@@ -118,7 +118,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Romantic Travel",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2009
   },
   {
@@ -133,7 +133,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Western Ghats Acoustic",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 1972
   },
   {
@@ -148,7 +148,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Calm Melody",
     "source": "swany",
-    "worldId": "rainy-train",
+    "worldId": "malnad-bus",
     "year": 2013
   },
   {
@@ -508,7 +508,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Romantic Highway",
     "source": "swany",
-    "worldId": "ksrtc-rain",
+    "worldId": "ksrtc-bus",
     "year": 2011
   },
   {
@@ -523,7 +523,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Nostalgic Classic",
     "source": "swany",
-    "worldId": "ksrtc-rain",
+    "worldId": "ksrtc-bus",
     "year": 2001
   },
   {
@@ -598,7 +598,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Highway Dawn",
     "source": "swany",
-    "worldId": "ksrtc-rain",
+    "worldId": "ksrtc-bus",
     "year": 2010
   },
   {
@@ -613,7 +613,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Mellow Acoustic",
     "source": "swany",
-    "worldId": "ksrtc-rain",
+    "worldId": "ksrtc-bus",
     "year": 2026
   },
   {
@@ -628,7 +628,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Late-Night Melodic",
     "source": "swany",
-    "worldId": "ksrtc-rain",
+    "worldId": "ksrtc-bus",
     "year": 2009
   },
   {
@@ -643,7 +643,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Highway Bus Drive",
     "source": "swany",
-    "worldId": "ksrtc-rain",
+    "worldId": "ksrtc-bus",
     "year": 2003
   },
   {
@@ -658,7 +658,7 @@ export const CURATED_TRACKS: Track[] = [
     "language": "Kannada",
     "genre": "Window Seat Memories",
     "source": "swany",
-    "worldId": "ksrtc-rain",
+    "worldId": "ksrtc-bus",
     "year": 2016
   },
   {

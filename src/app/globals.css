@@ -22,7 +22,7 @@ html, body {
   height: 100dvh;
   margin: 0;
   padding: 0;
-  background-color: #020617;
+  background-color: #000000;
   color: #f8fafc;
   font-family: var(--font-sans);
   overflow: hidden;
@@ -32,6 +32,46 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+/* Fullscreen Edge-to-Edge Mobile Video Background Container */
+.world-bg-container {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 100vw !important;
+  min-height: 100dvh !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  background-color: #000000 !important;
+}
+
+/* Force video to fill 100% full screen on all mobile browsers */
+.world-bg-media {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+.world-bg-media.fit-contain {
+  object-fit: contain !important;
 }
 
 /* Buttery Smooth Hardware Acceleration */

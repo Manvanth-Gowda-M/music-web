@@ -17,8 +17,8 @@ class MusicServiceClass {
     return this.provider.name;
   }
 
-  async search(query: string): Promise<Track[]> {
-    return this.provider.search(query);
+  async search(query: string, language?: string, mood?: string): Promise<Track[]> {
+    return this.provider.search(query, language, mood);
   }
 
   async getTrack(id: string): Promise<Track | null> {
