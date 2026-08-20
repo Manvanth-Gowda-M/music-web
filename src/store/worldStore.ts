@@ -59,19 +59,17 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       AudioEngine.pauseAmbient();
     }
 
-    // Immediately switch the music playlist & play a fresh random song from the new world's vibe
+    // Immediately adapt the active song theme to the world's relative mood
     const player = usePlayerStore.getState();
-    const allTracks = nextWorld.recommendedPlaylists.flatMap((p) => p.tracks);
+    const defaultMood = nextWorld.defaultMood || 'Lofi';
+    player.setSelectedTheme(defaultMood);
 
-    if (allTracks.length > 0) {
-      // Dynamic random shuffle so every visit to a world starts with a fresh, different song
-      const shuffledTracks = [...allTracks].sort(() => Math.random() - 0.5);
-      const randomTrack = shuffledTracks[0];
-
+    if (autoPlayMusic) {
+      const selectedLang = player.selectedLanguage || 'Kannada';
       try {
-        await player.playTrack(randomTrack, shuffledTracks);
-      } catch (err) {
-        console.warn('Auto transition track error:', err);
+        await player.playStation(selectedLang, defaultMood);
+      } catch (e) {
+        console.warn('Live station switch error:', e);
       }
     }
 

@@ -12,6 +12,7 @@ import { PlayQueue } from '@/components/player/PlayQueue';
 import { SearchOverlay } from '@/components/search/SearchOverlay';
 import { LibraryModal } from '@/components/library/LibraryModal';
 import { SettingsModal } from '@/components/settings/SettingsModal';
+import { LanguageStationModal } from '@/components/station/LanguageStationModal';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { usePlayerStore } from '@/store/playerStore';
 import { AlertCircle, X } from 'lucide-react';
@@ -82,6 +83,8 @@ export default function Home() {
       />
 
       <LibraryModal />
+
+      <LanguageStationModal />
 
       <SettingsModal
         isOpen={isSettingsOpen}

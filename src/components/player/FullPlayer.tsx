@@ -102,7 +102,7 @@ export const FullPlayer: React.FC = () => {
         </button>
       </div>
 
-      {/* Center Body: Artwork, Kannada Metadata, Visualizer */}
+      {/* Center Body: Artwork, Metadata, Visualizer */}
       <div className="w-full max-w-md mx-auto my-auto flex flex-col items-center text-center py-2 sm:py-6">
         {/* Themed Relatable 3D Centerpiece Player (Vintage Cassette / Temple Brass / Beach Deck / Passenger Glass) */}
         {currentWorld.id === 'ksrtc-bus' ? (

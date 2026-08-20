@@ -69,6 +69,7 @@ export interface World {
   ambientCategory: string;
   palette: WorldPalette;
   visualizerStyle: VisualizerStyle;
+  defaultMood?: string;
   recommendedGenres: string[];
   recommendedPlaylists: Playlist[];
   ambientSound?: AmbientSound;

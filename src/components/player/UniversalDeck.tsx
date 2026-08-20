@@ -11,10 +11,15 @@ import {
   Shuffle,
   Repeat,
   Search,
+  Globe2,
+  Sparkles,
+  Radio,
+  Loader2,
 } from 'lucide-react';
 import { usePlayerStore } from '@/store/playerStore';
 import { useWorldStore } from '@/store/worldStore';
 import { AudioEngine } from '@/services/audio/AudioEngine';
+import { LANGUAGES, SONG_THEMES } from '@/data/languagesAndThemes';
 
 function formatTime(seconds: number): string {
   if (isNaN(seconds) || seconds < 0) return '00:00';
@@ -33,6 +38,7 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
     isMuted,
     shuffle,
     repeat,
+    isLoading,
     togglePlay,
     seek,
     next,
@@ -42,6 +48,10 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
     toggleShuffle,
     cycleRepeat,
     playTrack,
+    selectedLanguage,
+    selectedTheme,
+    playStation,
+    setStationModalOpen,
   } = usePlayerStore();
 
   const { currentWorld } = useWorldStore();
@@ -129,12 +139,8 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
     e.stopPropagation();
     await AudioEngine.resumeContext();
     if (!isPlaying && !currentTrack) {
-      const allTracks = currentWorld.recommendedPlaylists.flatMap((p) => p.tracks);
-      if (allTracks.length > 0) {
-        const shuffled = [...allTracks].sort(() => Math.random() - 0.5);
-        await playTrack(shuffled[0], shuffled);
-        return;
-      }
+      await playStation(selectedLanguage || 'Kannada', selectedTheme);
+      return;
     }
     togglePlay();
   };
@@ -152,6 +158,17 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
     const clickX = e.clientX - rect.left;
     const ratio = Math.max(0, Math.min(1, clickX / rect.width));
     setVolume(ratio);
+  };
+
+  const handleQuickLanguageChange = async (langId: string) => {
+    await AudioEngine.resumeContext();
+    await playStation(langId, selectedTheme);
+  };
+
+  const handleQuickThemeChange = async (themeId: string) => {
+    await AudioEngine.resumeContext();
+    const nextTheme = selectedTheme === themeId ? null : themeId;
+    await playStation(selectedLanguage || 'Kannada', nextTheme);
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -185,20 +202,50 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30">
-              320 KBPS AAC
-            </span>
+            <button
+              onClick={() => setStationModalOpen(true)}
+              className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/30 flex items-center gap-1 transition-all active:scale-95 touch-manipulation"
+              title="Open All Languages & Stations"
+            >
+              <Radio className="w-2.5 h-2.5" />
+              <span>STATIONS</span>
+            </button>
             <span className="text-[8px] font-mono text-cyan-400">
-              {activeEqPreset} EQ
+              320K AAC
             </span>
           </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* ON-BOARD QUICK LANGUAGE SELECTOR TABS */}
+        {/* ========================================================================= */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1.5 mb-2 smooth-scroll no-scrollbar">
+          {LANGUAGES.map((lang) => {
+            const isLangActive = (selectedLanguage || 'Kannada') === lang.id;
+            return (
+              <button
+                key={lang.id}
+                onClick={() => handleQuickLanguageChange(lang.id)}
+                disabled={isLoading}
+                title={`Play ${lang.name} Songs`}
+                className={`px-2 py-1 rounded-lg text-[9px] font-bold font-mono uppercase whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 touch-manipulation active:scale-90 ${
+                  isLangActive
+                    ? 'bg-pink-500 text-white shadow-[0_0_10px_rgba(236,72,153,0.6)]'
+                    : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                }`}
+              >
+                <span>{lang.flag}</span>
+                <span>{lang.nativeName.split(' ')[0]}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* ========================================================================= */}
         {/* OLED SCREEN DISPLAY */}
         {/* ========================================================================= */}
         <div
-          className="relative rounded-2xl p-2.5 sm:p-3 mb-2.5 overflow-hidden border border-pink-500/20"
+          className="relative rounded-2xl p-2.5 sm:p-3 mb-2 overflow-hidden border border-pink-500/20"
           style={{
             background: 'radial-gradient(circle at 50% 30%, #151226 0%, #06050a 100%)',
             boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.8), 0 0 15px rgba(236, 72, 153, 0.1)',
@@ -207,16 +254,26 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
           {/* OLED Status Header */}
           <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 mb-1.5">
             <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              <span className="text-white/80 font-bold">{isPlaying ? 'STREAMING' : 'READY'}</span>
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isLoading
+                    ? 'bg-cyan-400 animate-ping'
+                    : isPlaying
+                    ? 'bg-emerald-400 animate-pulse'
+                    : 'bg-amber-400'
+                }`}
+              />
+              <span className="text-white/80 font-bold">
+                {isLoading ? 'TUNING IN...' : isPlaying ? 'STREAMING' : 'READY'}
+              </span>
             </div>
 
             <div className="flex items-center gap-1 text-[8px]">
               <span className="text-cyan-300 font-semibold px-1 rounded bg-cyan-950/60 border border-cyan-500/30">
-                {currentTrack?.language?.toUpperCase() || 'ALL LANG'}
+                {selectedLanguage?.toUpperCase() || 'KANNADA'}
               </span>
-              <span className="text-pink-300 font-semibold px-1 rounded bg-pink-950/60 border border-pink-500/30">
-                {currentTrack?.genre || 'UNIVERSAL'}
+              <span className="text-pink-300 font-semibold px-1 rounded bg-pink-950/60 border border-pink-500/30 truncate max-w-[90px]">
+                {selectedTheme ? selectedTheme.toUpperCase() : 'ALL VIBES'}
               </span>
             </div>
           </div>
@@ -228,16 +285,16 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
                 {currentTrack?.localizedTitle || currentTrack?.title || 'Universal Hits Stream'}
               </h3>
               <p className="text-[10px] text-pink-300/80 truncate font-medium mt-0.5">
-                {currentTrack?.artist || 'Kannada • Hindi • Tamil • Telugu • English'}
+                {currentTrack?.artist || 'Multi-Language Live HD Audio'}
               </p>
             </div>
 
             {/* Live OLED Equalizer Display */}
-            <div className="w-24 sm:w-32 h-8 sm:h-10 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/80">
+            <div className="w-24 sm:w-28 h-8 sm:h-9 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-black/80">
               <canvas
                 ref={canvasRef}
-                width={130}
-                height={40}
+                width={120}
+                height={36}
                 className="w-full h-full block"
               />
             </div>
@@ -266,6 +323,31 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
         </div>
 
         {/* ========================================================================= */}
+        {/* ON-BOARD QUICK THEME / MOOD CHIPS */}
+        {/* ========================================================================= */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1.5 mb-2.5 smooth-scroll no-scrollbar">
+          {SONG_THEMES.slice(0, 6).map((theme) => {
+            const isThemeActive = selectedTheme === theme.id;
+            return (
+              <button
+                key={theme.id}
+                onClick={() => handleQuickThemeChange(theme.id)}
+                disabled={isLoading}
+                title={theme.title}
+                className={`px-2 py-0.5 rounded-full text-[9px] font-medium whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 touch-manipulation active:scale-90 ${
+                  isThemeActive
+                    ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)]'
+                    : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                }`}
+              >
+                <span>{theme.icon}</span>
+                <span>{theme.title.split('&')[0].trim()}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ========================================================================= */}
         {/* CYBER HARDWARE CONTROLS BAR */}
         {/* ========================================================================= */}
         <div className="flex items-center justify-between gap-1.5 sm:gap-2 px-1">
@@ -286,15 +368,12 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
 
             <button
               type="button"
-              onClick={() => {
-                const searchBtn = document.querySelector('button[aria-label="Search"]') as HTMLButtonElement;
-                if (searchBtn) searchBtn.click();
-              }}
-              title="Open Universal Music Hub & Filters"
+              onClick={() => setStationModalOpen(true)}
+              title="Open All Languages & Song Themes"
               className="px-2.5 py-1.5 rounded-xl border border-cyan-500/30 bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-300 hover:text-white text-[10px] font-semibold flex items-center gap-1 transition-all active:scale-95 touch-manipulation"
             >
-              <Search className="w-3 h-3" />
-              <span>HUB</span>
+              <Globe2 className="w-3 h-3 text-cyan-400" />
+              <span>STATION</span>
             </button>
           </div>
 
@@ -323,7 +402,9 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
                   : '0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
               }}
             >
-              {isPlaying ? (
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              ) : isPlaying ? (
                 <Pause className="w-5 h-5 text-white fill-current" />
               ) : (
                 <Play className="w-5 h-5 text-white fill-current ml-0.5" />
@@ -371,7 +452,7 @@ export const UniversalDeck: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenS
               </button>
               <div
                 onClick={handleVolumeSeek}
-                className="w-12 sm:w-16 h-1 bg-white/15 rounded-full cursor-pointer overflow-hidden hidden xs:block"
+                className="w-10 sm:w-14 h-1 bg-white/15 rounded-full cursor-pointer overflow-hidden hidden xs:block"
               >
                 <div
                   className="h-full bg-pink-400 rounded-full"

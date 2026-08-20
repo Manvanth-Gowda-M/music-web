@@ -135,13 +135,24 @@ export const TempleDeck: React.FC = () => {
     if (e) e.stopPropagation();
     await AudioEngine.resumeContext();
     if (!isPlaying) {
+      const { selectedLanguage, selectedTheme, playStation } = usePlayerStore.getState();
+      if (selectedLanguage && selectedLanguage !== 'Kannada' && currentTrack?.language !== selectedLanguage) {
+        await playStation(selectedLanguage, selectedTheme || currentWorld.defaultMood || 'Devotional');
+        return;
+      }
       if (currentTrack) {
         await play();
       } else {
+        if (selectedLanguage && selectedLanguage !== 'Kannada') {
+          await playStation(selectedLanguage, selectedTheme || currentWorld.defaultMood || 'Devotional');
+          return;
+        }
         const allTracks = currentWorld.recommendedPlaylists.flatMap((p) => p.tracks);
         if (allTracks.length > 0) {
           const shuffled = [...allTracks].sort(() => Math.random() - 0.5);
           await playTrack(shuffled[0], shuffled);
+        } else {
+          await playStation('Kannada', 'Devotional');
         }
       }
     }

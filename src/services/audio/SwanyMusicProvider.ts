@@ -24,7 +24,7 @@ export class SwanyMusicProvider implements MusicProvider {
       const endpoint = `/api/songs/search?${params.toString()}`;
       const res = await fetch(endpoint, {
         headers: { Accept: 'application/json' },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(12000),
       });
 
       if (!res.ok) throw new Error('Search failed');
@@ -33,10 +33,10 @@ export class SwanyMusicProvider implements MusicProvider {
       if (Array.isArray(data?.results) && data.results.length > 0) {
         return data.results;
       }
-      return this.fallbackProvider.search(query);
+      return this.fallbackProvider.search(query, language, mood);
     } catch (err) {
       console.warn('Live API search error, falling back to curated library:', err);
-      return this.fallbackProvider.search(query);
+      return this.fallbackProvider.search(query, language, mood);
     }
   }
 

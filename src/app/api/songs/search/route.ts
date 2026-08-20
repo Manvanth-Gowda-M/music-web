@@ -33,42 +33,62 @@ function cleanHtmlEntities(str: string): string {
     .replace(/&gt;/g, '>');
 }
 
+const MOOD_KEYWORDS: Record<string, string> = {
+  Lofi: 'lofi',
+  Party: 'party hits',
+  Devotional: 'devotional',
+  Acoustic: 'acoustic',
+  Romantic: 'romantic hits',
+  Retro: '90s hits',
+  Drive: 'drive songs',
+  Bass: 'edm bass',
+  Sad: 'sad songs',
+};
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim() || '';
   const language = searchParams.get('lang') || 'Kannada';
   const mood = searchParams.get('mood') || '';
 
-  // Build intelligent multi-language search query
-  let searchQuery = '';
+  const moodTerm = MOOD_KEYWORDS[mood] || mood;
+
+  // Build intelligent multi-language search query with fallbacks
+  let primaryQuery = '';
+  let fallbackQuery = '';
+
   if (q) {
-    searchQuery = language && language !== 'All' ? `${q} ${language}` : q;
-  } else if (mood) {
-    searchQuery = language && language !== 'All' ? `${language} ${mood} songs` : `${mood} songs`;
+    primaryQuery = language && language !== 'All' ? `${q} ${language}` : q;
+  } else if (moodTerm) {
+    primaryQuery = language && language !== 'All' ? `${language} ${moodTerm}` : `${moodTerm} songs`;
+    fallbackQuery = language && language !== 'All' ? `${language} hits` : 'top trending songs';
   } else {
-    searchQuery = language && language !== 'All' ? `${language} top hits trending` : 'top trending hits';
+    primaryQuery = language && language !== 'All' ? `${language} top hits trending` : 'top trending hits';
   }
 
   try {
-    const targetUrl = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=30&p=1&q=${encodeURIComponent(
-      searchQuery
-    )}`;
+    const fetchResults = async (queryStr: string) => {
+      const targetUrl = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=30&p=1&q=${encodeURIComponent(
+        queryStr
+      )}`;
+      const res = await fetch(targetUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept: 'application/json',
+        },
+        next: { revalidate: 3600 },
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.results || [];
+    };
 
-    const res = await fetch(targetUrl, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        Accept: 'application/json',
-      },
-      next: { revalidate: 3600 },
-    });
+    let rawResults = await fetchResults(primaryQuery);
 
-    if (!res.ok) {
-      throw new Error(`Upstream returned ${res.status}`);
+    if (rawResults.length === 0 && fallbackQuery) {
+      rawResults = await fetchResults(fallbackQuery);
     }
-
-    const data = await res.json();
-    const rawResults = data.results || [];
 
     const tracks = rawResults
       .map((r: any) => {

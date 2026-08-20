@@ -20,32 +20,12 @@ import { MusicService } from '@/services/audio/MusicService';
 import { AudioEngine } from '@/services/audio/AudioEngine';
 import { Track } from '@/types';
 
+import { LANGUAGES, SONG_THEMES } from '@/data/languagesAndThemes';
+
 interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const LANGUAGES = [
-  { id: 'Kannada', label: 'ಕನ್ನಡ', sub: 'Kannada', color: '#f59e0b' },
-  { id: 'Hindi', label: 'हिंदी', sub: 'Hindi', color: '#ef4444' },
-  { id: 'Tamil', label: 'தமிழ்', sub: 'Tamil', color: '#3b82f6' },
-  { id: 'Telugu', label: 'తెలుగు', sub: 'Telugu', color: '#10b981' },
-  { id: 'Malayalam', label: 'മലയാളം', sub: 'Malayalam', color: '#8b5cf6' },
-  { id: 'English', label: 'English', sub: 'Global Pop', color: '#06b6d4' },
-  { id: 'All', label: '🌐 All', sub: 'Universal', color: '#e2e8f0' },
-];
-
-const MOODS = [
-  { id: 'Lofi', label: '🌧️ Lofi & Rain', knLabel: 'ಲೋಫೈ & ಮಳೆ', query: 'lofi chill' },
-  { id: 'Party', label: '🎉 Party & Dance', knLabel: 'ಪಾರ್ಟಿ ಡ್ಯಾನ್ಸ್', query: 'party dance fast' },
-  { id: 'Acoustic', label: '☕ Acoustic & Chill', knLabel: 'ಅಕೌಸ್ಟಿಕ್ ಮೆಲೋಡಿ', query: 'acoustic unplugged calm' },
-  { id: 'Devotional', label: '🛕 Devotional & Ragas', knLabel: 'ಭಕ್ತಿ & ಶಾಂತಿ', query: 'devotional classical raga bhakti' },
-  { id: 'Romantic', label: '❤️ Romance & Love', knLabel: 'ಪ್ರೇಮ ಗೀತೆಗಳು', query: 'love romantic melody' },
-  { id: 'Drive', label: '🚗 Night Highway Drive', knLabel: 'ರಾತ್ರಿ ಪಯಣ', query: 'night drive highway travel' },
-  { id: 'Retro', label: '📻 Golden 80s & 90s', knLabel: 'ಹಳೆಯ ಕ್ಲಾಸಿಕ್ಸ್', query: 'retro 80s 90s classic evergreen' },
-  { id: 'Bass', label: '⚡ Bass Boosted & EDM', knLabel: 'ಹೈ ಎನರ್ಜಿ', query: 'edm bass boosted remix' },
-  { id: 'Sad', label: '🌙 Soulful & Sad', knLabel: 'ಭಾವಪೂರ್ಣ', query: 'sad emotional heart touching' },
-];
 
 function formatDuration(seconds: number): string {
   if (isNaN(seconds) || seconds <= 0) return '3:45';
@@ -77,7 +57,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
   const executeSearch = async (qText: string, lang: string, moodId: string | null) => {
     setIsSearching(true);
     try {
-      const moodObj = MOODS.find((m) => m.id === moodId);
+      const moodObj = SONG_THEMES.find((m) => m.id === moodId);
       const moodQuery = moodObj ? moodObj.query : '';
       const finalQuery = qText || moodQuery;
 
@@ -236,9 +216,10 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                       borderColor: isSelected ? lang.color : 'rgba(255, 255, 255, 0.1)',
                     }}
                   >
-                    <span>{lang.label}</span>
+                    <span>{lang.flag}</span>
+                    <span>{lang.nativeName.split(' ')[0]}</span>
                     <span className={`text-[9px] opacity-70 ${isSelected ? 'text-black/70' : 'text-slate-400'}`}>
-                      {lang.sub}
+                      {lang.name}
                     </span>
                   </button>
                 );
@@ -251,13 +232,13 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
           {/* ========================================================================= */}
           <div>
             <div className="flex items-center gap-1.5 mb-1.5">
-              <Sparkles className="w-3 h-3 text-amber-400" />
+              <Sparkles className="w-3 h-3 text-pink-400" />
               <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 font-semibold">
-                Mood & Vibe / ಮನಸ್ಥಿತಿ:
+                Song Theme & Vibe / ಸಂಗೀತ ಶೈಲಿ:
               </span>
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar touch-pan-x">
-              {MOODS.map((m) => {
+              {SONG_THEMES.map((m) => {
                 const isSelected = selectedMood === m.id;
                 return (
                   <button
@@ -266,11 +247,12 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                     onClick={() => handleMoodSelect(m.id)}
                     className={`flex-shrink-0 px-2.5 py-1 rounded-xl text-[11px] font-medium transition-all duration-200 border flex items-center gap-1 active:scale-95 touch-manipulation ${
                       isSelected
-                        ? 'bg-amber-500/30 border-amber-400 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                        ? 'bg-pink-500/30 border-pink-400 text-pink-200 shadow-[0_0_12px_rgba(236,72,153,0.4)]'
                         : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
                     }`}
                   >
-                    <span>{m.label}</span>
+                    <span>{m.icon}</span>
+                    <span>{m.title.split('&')[0].trim()}</span>
                   </button>
                 );
               })}

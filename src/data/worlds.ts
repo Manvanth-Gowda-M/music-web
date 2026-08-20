@@ -14,6 +14,7 @@ export const WORLDS: World[] = [
     poster: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1920&auto=format&fit=crop&q=80',
     ambientCategory: 'Vintage / Night / Nostalgia',
     visualizerStyle: 'bus',
+    defaultMood: 'Retro',
     recommendedGenres: ['SPB Classics', 'Ilaiyaraaja', 'Dr. Rajkumar', 'Golden 80s', 'Vintage Radio'],
     palette: {
       accent: '#f97316',        // Warm sunset orange
@@ -57,6 +58,7 @@ export const WORLDS: World[] = [
     poster: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=1920&auto=format&fit=crop&q=80',
     ambientCategory: 'Peaceful / Devotional / Classical',
     visualizerStyle: 'temple',
+    defaultMood: 'Devotional',
     recommendedGenres: ['Carnatic Classical', 'Dasa Sahitya', 'Purandara Dasa', 'Kanakadasa', 'Suprabhata'],
     palette: {
       accent: '#d97706',        // Soft warm brass / sandalwood
@@ -111,6 +113,7 @@ export const WORLDS: World[] = [
     poster: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&auto=format&fit=crop&q=80',
     ambientCategory: 'Ocean / Solitude / Calm',
     visualizerStyle: 'coast',
+    defaultMood: 'Acoustic',
     recommendedGenres: ['Coastal Trending', 'Ocean Breeze', 'Karavali Melodies', 'Bhavageethe', 'Acoustic Solitude'],
     palette: {
       accent: '#38bdf8',        // Muted sea cyan / sky
@@ -165,6 +168,7 @@ export const WORLDS: World[] = [
     poster: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&auto=format&fit=crop&q=80',
     ambientCategory: 'Monsoon / Bus / Nostalgia',
     visualizerStyle: 'rain',
+    defaultMood: 'Romantic',
     recommendedGenres: ['Monsoon Classics', 'Acoustic Melody', 'Western Ghats', 'Evergreen Rain', 'Travel Songs'],
     palette: {
       accent: '#60a5fa',        // Muted cool blue
@@ -215,10 +219,11 @@ export const WORLDS: World[] = [
     localizedTagline: 'ಎಲ್ಲಾ ಭಾಷೆ, ಮೂಡ್ & ಅನಂತ ಗಾನ.',
     description: 'Explore songs across all languages (Kannada, Hindi, Tamil, Telugu, English) and moods (Lofi, Party, Acoustic, Devotional, Retro) with live streaming.',
     localizedDescription: 'ಕನ್ನಡ, ಹಿಂದಿ, ತಮಿಳು ಹಾಗೂ ಜಾಗತಿಕ ಗೀತೆಗಳ ಮುಕ್ತ ಸಂಗೀತ ಲೌಂಜ್.',
-    video: '/worlds/coastal-morning/background.mp4',
+    video: '/worlds/universal-mode/background.mp4',
     poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&auto=format&fit=crop&q=80',
     ambientCategory: 'Universal / Multi-Language / Infinite',
     visualizerStyle: 'universal',
+    defaultMood: 'Lofi',
     recommendedGenres: ['Lofi Beats', 'Party & Dance', 'Acoustic Solitude', 'Devotional Ragas', 'Retro 90s', 'EDM & Bass'],
     palette: {
       accent: '#ec4899',        // Neon cosmic magenta / violet

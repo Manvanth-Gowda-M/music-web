@@ -27,21 +27,11 @@ export function useAudioPlayer() {
     const audio = AudioEngine.getAudioElement();
     if (!audio) return;
 
-    // Dynamic initial track selection on website open
+    // Fresh dynamic track selection on website open
     const current = usePlayerStore.getState().currentTrack;
     if (!current) {
-      const allTracks = currentWorld.recommendedPlaylists.flatMap((p) => p.tracks);
-      if (allTracks.length > 0) {
-        const shuffled = [...allTracks].sort(() => Math.random() - 0.5);
-        const randomInitialTrack = shuffled[0];
-        usePlayerStore.setState({
-          currentTrack: randomInitialTrack,
-          queue: shuffled,
-          duration: randomInitialTrack.duration || 0,
-        });
-        audio.src = randomInitialTrack.audioUrl;
-        audio.load();
-      }
+      const player = usePlayerStore.getState();
+      player.playStation(player.selectedLanguage || 'Kannada', currentWorld.defaultMood || 'Retro');
     }
 
     const onTimeUpdate = () => {

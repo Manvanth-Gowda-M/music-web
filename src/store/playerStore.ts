@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { Track, RepeatMode } from '@/types';
 import { AudioEngine } from '@/services/audio/AudioEngine';
 import { CURATED_TRACKS } from '@/data/curatedTracks';
+import { MusicService } from '@/services/audio/MusicService';
 
 interface PlayerStore {
   currentTrack: Track | null;
@@ -20,6 +21,9 @@ interface PlayerStore {
   error: string | null;
   isFullPlayerOpen: boolean;
   isQueueOpen: boolean;
+  selectedLanguage: string;
+  selectedTheme: string | null;
+  isStationModalOpen: boolean;
 
   // Actions
   playTrack: (track: Track, newQueue?: Track[]) => Promise<void>;
@@ -41,6 +45,10 @@ interface PlayerStore {
   setFullPlayerOpen: (open: boolean) => void;
   setQueueOpen: (open: boolean) => void;
   setError: (error: string | null) => void;
+  setStationModalOpen: (open: boolean) => void;
+  setSelectedLanguage: (lang: string) => void;
+  setSelectedTheme: (theme: string | null) => void;
+  playStation: (language: string, theme: string | null, customQuery?: string) => Promise<void>;
 }
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
@@ -58,6 +66,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   error: null,
   isFullPlayerOpen: false,
   isQueueOpen: false,
+  selectedLanguage: 'Kannada',
+  selectedTheme: null,
+  isStationModalOpen: false,
 
   playTrack: async (track: Track, newQueue?: Track[]) => {
     try {
@@ -157,13 +168,21 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   },
 
   next: async () => {
-    const { queue, currentTrack, shuffle, repeat } = get();
+    const { queue, currentTrack, shuffle, repeat, selectedLanguage, selectedTheme } = get();
     let activeQueue = queue;
 
     if (activeQueue.length <= 1) {
-      const worldTracks = CURATED_TRACKS.filter((t) => t.worldId === currentTrack?.worldId);
-      activeQueue = worldTracks.length > 0 ? worldTracks : CURATED_TRACKS;
-      set({ queue: activeQueue });
+      try {
+        const liveTracks = await MusicService.search('', selectedLanguage || 'Kannada', selectedTheme || '');
+        if (liveTracks.length > 0) {
+          activeQueue = liveTracks;
+          set({ queue: liveTracks });
+        }
+      } catch (e) {
+        const worldTracks = CURATED_TRACKS.filter((t) => t.worldId === currentTrack?.worldId);
+        activeQueue = worldTracks.length > 0 ? worldTracks : CURATED_TRACKS;
+        set({ queue: activeQueue });
+      }
     }
 
     if (repeat === 'one' && currentTrack) {
@@ -188,32 +207,42 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
     const nextTrack = activeQueue[nextIndex];
     if (nextTrack) {
-      await get().playTrack(nextTrack);
+      await get().playTrack(nextTrack, activeQueue);
     }
   },
 
   previous: async () => {
-    const { queue, currentTrack, currentTime } = get();
-    if (queue.length === 0 && !currentTrack) return;
+    const { queue, currentTrack, selectedLanguage, selectedTheme } = get();
+    let activeQueue = queue;
 
-    // If more than 3 seconds in, restart track first; double click to go to prev
-    if (currentTime > 3) {
-      get().seek(0);
-      return;
+    if (activeQueue.length <= 1) {
+      try {
+        const liveTracks = await MusicService.search('', selectedLanguage || 'Kannada', selectedTheme || '');
+        if (liveTracks.length > 0) {
+          activeQueue = liveTracks;
+          set({ queue: liveTracks });
+        }
+      } catch (e) {
+        const worldTracks = CURATED_TRACKS.filter((t) => t.worldId === currentTrack?.worldId);
+        activeQueue = worldTracks.length > 0 ? worldTracks : CURATED_TRACKS;
+        set({ queue: activeQueue });
+      }
     }
 
-    const currentIndex = queue.findIndex((t) => t.id === currentTrack?.id);
+    if (activeQueue.length === 0) return;
+
+    const currentIndex = activeQueue.findIndex((t) => t.id === currentTrack?.id);
     let prevIndex = 0;
 
     if (currentIndex > 0) {
       prevIndex = currentIndex - 1;
-    } else if (queue.length > 0) {
-      prevIndex = queue.length - 1;
+    } else {
+      prevIndex = activeQueue.length - 1;
     }
 
-    const prevTrack = queue[prevIndex];
+    const prevTrack = activeQueue[prevIndex];
     if (prevTrack) {
-      await get().playTrack(prevTrack);
+      await get().playTrack(prevTrack, activeQueue);
     }
   },
 
@@ -291,5 +320,48 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   setError: (error: string | null) => {
     set({ error });
+  },
+
+  setStationModalOpen: (open: boolean) => {
+    set({ isStationModalOpen: open });
+  },
+
+  setSelectedLanguage: async (selectedLanguage: string) => {
+    set({ selectedLanguage });
+    const { selectedTheme } = get();
+    await get().playStation(selectedLanguage, selectedTheme);
+  },
+
+  setSelectedTheme: (selectedTheme: string | null) => {
+    set({ selectedTheme });
+  },
+
+  playStation: async (language: string, theme: string | null, customQuery?: string) => {
+    try {
+      set({ selectedLanguage: language, selectedTheme: theme, isLoading: true, error: null });
+      let tracks = await MusicService.search(customQuery || '', language, theme || '');
+      if (!tracks || tracks.length === 0) {
+        // Seamless fallback to top hits for this language
+        tracks = await MusicService.search('', language, '');
+      }
+      if (tracks && tracks.length > 0) {
+        // Dynamic shuffle so every session and station tune-in starts with a fresh, different song
+        const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+        await get().playTrack(shuffled[0], shuffled);
+      } else {
+        set({ isLoading: false });
+      }
+    } catch (e) {
+      console.warn('Station play error:', e);
+      try {
+        const fallbackTracks = await MusicService.search('', language, '');
+        if (fallbackTracks && fallbackTracks.length > 0) {
+          const shuffledFallback = [...fallbackTracks].sort(() => Math.random() - 0.5);
+          await get().playTrack(shuffledFallback[0], shuffledFallback);
+          return;
+        }
+      } catch (err2) {}
+      set({ isLoading: false });
+    }
   },
 }));

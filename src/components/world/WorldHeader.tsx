@@ -11,10 +11,16 @@ import {
   Sparkles,
   Monitor,
   Smartphone,
+  Radio,
+  Globe2,
 } from 'lucide-react';
 import { useWorldStore } from '@/store/worldStore';
 import { useLibraryStore } from '@/store/libraryStore';
+import { usePlayerStore } from '@/store/playerStore';
 import { VisualizerToggle } from '@/components/visualizer/VisualizerToggle';
+import { getLocalizedWorld, getBrandName } from '@/data/translations';
+import { LANGUAGES } from '@/data/languagesAndThemes';
+import { ChevronDown } from 'lucide-react';
 
 interface WorldHeaderProps {
   onOpenSearch: () => void;
@@ -31,6 +37,7 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
 }) => {
   const { currentWorld, settings, toggleAmbient, updateSettings } = useWorldStore();
   const { setLibraryOpen } = useLibraryStore();
+  const { setStationModalOpen, selectedLanguage, selectedTheme } = usePlayerStore();
 
   const toggleDesktopMode = () => {
     updateSettings({ forceDesktopMode: !settings.forceDesktopMode });
@@ -54,8 +61,8 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
           />
         </div>
         <div className="flex items-center gap-1">
-          <span className="font-kannada font-bold text-sm sm:text-lg tracking-wide text-white drop-shadow-sm">
-            ಸ್ವರ ಲೋಕ
+          <span className="font-bold text-sm sm:text-lg tracking-wide text-white drop-shadow-sm transition-all duration-300">
+            {getBrandName(selectedLanguage || 'Kannada')}
           </span>
           <span className="text-[8px] sm:text-[10px] uppercase tracking-[0.14em] font-medium text-slate-300/80 px-1 py-0.2 rounded border border-white/10 bg-white/5 hidden xs:inline">
             Swara
@@ -84,8 +91,8 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
             <span className="text-[11px] sm:text-xs font-semibold text-white/95 truncate">
               {currentWorld.name}
             </span>
-            <span className="text-[11px] font-kannada text-slate-300 hidden md:inline truncate">
-              • {currentWorld.localizedName}
+            <span className="text-[11px] text-slate-300 hidden md:inline truncate">
+              • {getLocalizedWorld(currentWorld.id, selectedLanguage || 'Kannada').name}
             </span>
           </div>
         </button>
@@ -94,12 +101,12 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
         <button
           onClick={() => {
             if (currentWorld.id === 'universal-mode') {
-              onOpenSearch();
+              setStationModalOpen(true);
             } else {
               useWorldStore.getState().switchWorld('universal-mode', true);
             }
           }}
-          title="Switch to Universal MP3 Mode & Hub"
+          title="Switch to Universal Mode • All Languages"
           aria-label="Universal Mode"
           className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full border transition-all duration-300 backdrop-blur-xl touch-manipulation active:scale-95 text-xs font-semibold flex-shrink-0 ${
             currentWorld.id === 'universal-mode'
@@ -110,6 +117,30 @@ export const WorldHeader: React.FC<WorldHeaderProps> = ({
           <span className="text-xs">🌐</span>
           <span className="hidden xs:inline">Universal</span>
         </button>
+
+        {/* Dedicated Languages & Song Themes Station Pill */}
+        {/* Dedicated Languages & Song Themes Station Pill */}
+        {(() => {
+          const currentLangObj = LANGUAGES.find((l) => l.id === (selectedLanguage || 'Kannada')) || LANGUAGES[0];
+          return (
+            <button
+              onClick={() => setStationModalOpen(true)}
+              title="Choose Language (Kannada, Hindi, Tamil, Telugu, Malayalam, English) & Song Theme"
+              aria-label="Languages & Song Themes"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border bg-black/50 hover:bg-black/75 text-white text-xs font-semibold transition-all backdrop-blur-xl touch-manipulation active:scale-95 shadow-md flex-shrink-0"
+              style={{
+                borderColor: currentLangObj.color,
+                boxShadow: `0 0 10px ${currentLangObj.color}25`,
+              }}
+            >
+              <span className="text-xs">{currentLangObj.flag}</span>
+              <span className="font-mono font-bold">
+                {currentLangObj.name}
+              </span>
+              <ChevronDown className="w-3 h-3 text-slate-300 ml-0.5" />
+            </button>
+          );
+        })()}
       </div>
 
       {/* Right: Quick Action Controls */}
